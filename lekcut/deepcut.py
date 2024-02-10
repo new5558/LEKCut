@@ -15,6 +15,14 @@ from lekcut.model import get_path
 import onnxruntime as ort
 import numpy as np
 
+import os
+ONNX_NUM_THREAD = 1
+os.environ['OMP_NUM_THREADS'] = f'{ONNX_NUM_THREAD}'
+
+opts = ort.SessionOptions()
+opts.inter_op_num_threads = ONNX_NUM_THREAD
+opts.intra_op_num_threads = ONNX_NUM_THREAD
+
 CHAR_TYPE = {
     u'กขฃคฆงจชซญฎฏฐฑฒณดตถทธนบปพฟภมยรลวศษสฬอ': 'c',
     u'ฅฉผฟฌหฮ': 'n',
@@ -118,7 +126,7 @@ class Tokenizer:
 
     def load_model(self, path: str):
         self.path = path
-        self.model = ort.InferenceSession(self.path)
+        self.model = ort.InferenceSession(self.path, sess_options=opts)
     
     def tokenize(self, text: str) -> List[str]:
         self.x_char, self.x_type = create_feature_array(text, n_pad=self.n_pad)
